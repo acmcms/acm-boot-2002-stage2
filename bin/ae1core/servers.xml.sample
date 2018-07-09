@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<servers>
+	<!-- 3 of 4 -->
+
+	<default>ru.myx</default>
+
+	<!--
+	###################################################################################################
+	##
+	##	Server list.
+	##
+	-->
+
+
+	<!-- ACM SERVER on mysql without pool & without profiling
+	<server id='ru.myx'
+		domain='myx.ru'
+		entrance='http://myx.ru'
+		aliases='m.gorod.ru; acm.m.gorod.ru'
+		class='ae1:RT3'
+		url="jdbc:mysql://host:3306/database"
+		useUnicode="true"
+		characterEncoding="UTF-8" 
+		user="user"
+		password="password"
+	/>
+	-->
+
+	<!-- ACM SERVER on mysql without pool & without profiling but with an 'unpaid' splash
+	<server id='ru.myx'
+		domain='myx.ru'
+		entrance='http://myx.ru'
+		aliases='m.gorod.ru; acm.m.gorod.ru'
+		class='ae1:RT3'
+		url="jdbc:mysql://host:3306/database"
+		useUnicode="true"
+		characterEncoding="UTF-8" 
+		user="user"
+		password="password"
+		splash="unpaid"
+	/>
+	-->
+
+	<!-- ACM + CONTROL SERVER on postgreSQL without pool & without profiling
+	<server id='ru.myx' 
+		domain='myx.ru'
+		entrance='http://myx.ru'
+		aliases='m.gorod.ru; acm.m.gorod.ru'
+		class='ae1:RT3_CONTROL'
+		url="jdbc:postgresql://host:5432/database"
+		user="user"
+		password="password"
+	/>
+	-->
+
+	<!-- ACM + CONTROL SERVER on oracle with sticky pool & profiling
+	<server id='ru.myx' 
+		domain='myx.ru'
+		entrance='http://myx.ru'
+		aliases='m.gorod.ru; acm.m.gorod.ru'
+		class='ae1:RT3_CONTROL'
+		url="jdbc:profile:ru.myx-sql,2000:jdbc:sticky(16,2m,30s):jdbc:oracleFix:jdbc:oracle:thin:@host:1521:instance"
+		user="user"
+		password="password"
+	/>
+	-->
+		
+	<!-- ACM + CONTROL SERVER on oracle with pool & profiling
+	<server id='ru.myx' 
+		domain='myx.ru'
+		entrance='http://myx.ru'
+		aliases='m.gorod.ru; acm.m.gorod.ru'
+		class='ae1:RT3_CONTROL'
+		url="jdbc:profile:ru.myx-sql,2000:jdbc:pool(4,4):jdbc:oracleFix:jdbc:oracle:thin:@host:1521:instance"
+		user="user"
+		password="password"
+	/>
+	-->
+		
+	<!-- ACM + CONTROL SERVER on ms sql with pool, profiling & local folders
+	<server id='ru.myx' 
+		domain='myx.ru'
+		entrance='http://myx.ru'
+		aliases='m.gorod.ru; acm.m.gorod.ru'
+		class='ae1:RT3_CONTROL'
+		url="jdbc:profile:ru.myx-sql,5000:jdbc:pool(2,2):jdbc:mssql:host:1433:database"
+		user="user"
+		password="password"
+	>
+		<folder key="files1" title="Files #1" path="/usr/local/ru.myx/files1"/>
+	</server>
+	-->
+
+	<!-- ACM DOWNLOAD SERVER, other settings in 'settings' folder
+	<server id="ru.myx.dl0"
+		domain="dl0.myx.ru"
+		aliases="dl0.myx.ru"
+		class="ae1:DOWNLOAD_SERVER"
+	/>
+	-->
+
+</servers>

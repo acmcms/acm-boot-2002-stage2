@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interfaces>
+	<!-- 4 of 4 -->
+
+	<!--
+	###################################################################################################
+	##
+	##	Launch interfaces
+	##
+	##	Interfaces will be launched in the same order as thet appear in this file.
+	##	Use "DISPATCH" factory as a target to route flow to a server specified in Host request attribute.
+	-->
+
+	<interface name="Virtual interface for common pooling (common pool dispatcher)">
+		<target>
+			<!-- диспетчер запросов - передает запросы серверу, соответствующему
+					заголовку Host в запросе -->
+			<factory>DISPATCH</factory>
+		</target>
+		<filter>
+			<!-- пул обработчиков запросов, позволяет ограничивать максимальную
+					нагрузку на сервер и сгладить её -->
+			<factory>POOL</factory>
+			
+			<!-- количество одновременно работающих пользовательских запросов -->
+			<limit>32</limit>
+			
+			<!-- длинна очереди ожидания обработки -->
+			<queue>512</queue>
+			
+			<!-- максимальное время ожидания в очереди -->
+			<timeout>30s</timeout>
+		</filter>
+		<filter>
+			<!-- дополняет запрос заголовками Geo-Peer и Geo-Mean на базе
+					IP-адресов клиента -->
+			<factory>GEO</factory>
+		</filter>
+		<filter>
+			<!-- осуществляет ответы встроенных в систему спейсеров (/__i/1.gif) -->
+			<factory>FASTREPLY</factory>
+		</filter>
+		<source>
+			<!-- определяет динамический, виртуальный интерфейс -->
+			<factory>VIRTUAL</factory>
+			
+			<!-- имя интерфейса для обращения -->
+			<id>pool_dispatcher</id>
+		</source>
+	</interface>
+
+
+	<interface name="HTTPS Interface 443 / common pool dispatcher">
+		<target>
+			<!-- перебрасывает на динамический, виртуальный интерфейс 
+					определенный выше -->
+			<factory>pool_dispatcher</factory>
+		</target>
+		<filter>
+			<!-- модифицирует заголовок запроса -->
+			<factory>MODIFY</factory>
+			
+			<!-- отвечает за модифицируемый заголовок -->
+			<attribute>
+				<!-- имя модифицируемого заголовка -->
+				<key>Secure</key>
+
+				<!-- значени модифицируемого заголовка -->
+				<value>true</value>
+			</attribute>
+		</filter>
+		<filter>
+			<!-- разбирает во входящем потоке запросы и формирует в исходящий поток 
+					ответы по правилам протокола HTTPS -->
+			<factory>HTTPS</factory>
+			
+			<!-- позволяет игнорировать порт сервера, указанный в запросе клиента -->
+			<ignoreTargetPort>false</ignoreTargetPort>
+			
+			<!-- позволяет игнорировать запросы пользователя на сжатие ответа сервера
+					методом gzip -->
+			<ignoreGzip>false</ignoreGzip>
+			
+			<!-- позволяет игнорировать запросы пользователя на постоянные соединения
+					с сервером -->
+			<ignoreKeepAlive>false</ignoreKeepAlive>
+			
+			<!-- физический и логический (Peer and Mean) адреса с учетом того, что 
+					интерфейс находится за reverse proxy -->
+			<reverseProxied>false</reverseProxied>
+		</filter>
+		<filter>
+			<!-- устанавливает SSL/TLS сессию в потоке данных, обеспечивает 
+					расшифровку поступающих данных и шифрование исходящих -->
+			<factory>TLS</factory>
+			
+			<!-- при автоматической генерации ключей, включить указанный домен в 
+					ключ, данная директива может повторяться многократно.
+					Если ни одного не указано будет использован:
+					1) параметр (-D при передаче аргументом явы) ru.myx.ae3.properties.hostname
+					2) явский java.net.InetAddress.getLocalHost().getHostName() -->
+			<domain>mydomain.net</domain>
+			
+			<!-- список допустимых протоклов шифрования -->
+			<cipher>TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384</cipher>
+			<cipher>TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384</cipher>
+			<cipher>TLS_RSA_WITH_AES_256_CBC_SHA256</cipher>
+			<cipher>TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384</cipher>
+			<cipher>TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384</cipher>
+			
+			<cipher>TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA</cipher>
+			<cipher>TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA</cipher>
+			<cipher>TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA</cipher>
+			<cipher>TLS_ECDH_RSA_WITH_AES_256_CBC_SHA</cipher>
+			<cipher>TLS_RSA_WITH_AES_256_GCM_SHA384</cipher>
+			
+			<cipher>TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256</cipher>
+			<cipher>TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA</cipher>
+			<cipher>TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA</cipher>
+			<cipher>TLS_RSA_WITH_AES_128_CBC_SHA256</cipher>
+			<cipher>TLS_RSA_WITH_AES_128_GCM_SHA256</cipher>
+			<cipher>TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA</cipher>
+			<cipher>TLS_ECDH_RSA_WITH_AES_128_CBC_SHA</cipher>
+
+			<!-- // <cipher>TLS_RSA_WITH_AES_256_CBC_SHA</cipher> // blocks FS with IE, disabled until SERVER_ORDER in jdk8 -->
+			
+			<!-- для поддержки IE6 
+			<cipher>SSL_RSA_WITH_RC4_128_SHA</cipher>
+			-->
+		</filter>
+		<source>
+			<!-- формирует входящий и исходящий потоки посредством приема TCP/IP соединений -->
+			<factory>ACCEPT</factory>
+			
+			<!-- IP-адрес для приема соединений или * для использования всех доступных адресов -->
+			<!-- использовать все доступные IP-адреса для приема соединений -->
+			<host>*</host>
+			
+			<!-- номер порта для приема соединений -->
+			<port>443</port>
+		</source>
+	</interface>
+
+	<interface name="HTTP Interface 80 / common pool dispatcher">
+		<target>
+			<!-- перебрасывает на динамический, виртуальный интерфейс 
+					определенный выше -->
+			<factory>pool_dispatcher</factory>
+		</target>
+		<filter>
+			<!-- разбирает во входящем потоке запросы и формирует в исходящий поток 
+					ответы по правилам протокола HTTP -->
+			<factory>HTTP</factory>
+			
+			<!-- позволяет игнорировать порт сервера, указанный в запросе клиента -->
+			<ignoreTargetPort>false</ignoreTargetPort>
+			
+			<!-- позволяет игнорировать запросы пользователя на сжатие ответа сервера
+					методом gzip -->
+			<ignoreGzip>false</ignoreGzip>
+			
+			<!-- позволяет игнорировать запросы пользователя на постоянные соединения
+					с сервером -->
+			<ignoreKeepAlive>false</ignoreKeepAlive>
+			
+			<!-- физический и логический (Peer and Mean) адреса с учетом того, что 
+					интерфейс находится за reverse proxy -->
+			<reverseProxied>false</reverseProxied>
+		</filter>
+		<source>
+			<!-- формирует входящий и исходящий потоки посредством приема TCP/IP соединений -->
+			<factory>ACCEPT</factory>
+			
+			<!-- IP-адрес для приема соединений или * для использования всех доступных адресов -->
+			<host>*</host>
+			
+			<!-- номер порта для приема соединений -->
+			<port>80</port>
+			
+			<!-- разрешает задержку ответов сервер для хостов производящих DoS атаку -->
+			<fair>true</fair>
+		</source>
+	</interface>
+
+
+	<!-- 
+		пример без пулинга запросов.
+		диспетчер запросов - передает запросы серверу, соответствующему
+					заголовку Host в запросе
+
+	<interface name="HTTP Interface 6802 / no pool">
+		<target>
+			<factory>DISPATCH</factory>
+		</target>
+		<filter>
+			<factory>GEO</factory>
+		</filter>
+		<filter>
+			<factory>FASTREPLY</factory>
+		</filter>
+		<filter>
+			<factory>MODIFY</factory>
+			<attribute>
+				<key>Accept-Encoding</key>
+			</attribute>
+		</filter>
+		<filter>
+			<factory>HTTP</factory>
+			<ignoreTargetPort>false</ignoreTargetPort>
+			<ignoreGzip>false</ignoreGzip>
+			<ignoreKeepAlive>false</ignoreKeepAlive>
+			<reverseProxied>false</reverseProxied>
+		</filter>
+		<source>
+			<factory>ACCEPT</factory>
+			<host>*</host>
+			<port>6802</port>
+		</source>
+	</interface>
+
+	-->
+	
+	<!--
+			Варианты с шейпингом и т.п.
+			
+	<interface name="HTTP peer unfair peers detection and banning with delay">
+		<target>
+			<factory>DISPATCH</factory>
+		</target>
+		<filter>
+			<factory>HTTP</factory>
+		</filter>
+		<source>
+			<factory>ACCEPT</factory>
+			<fair>true</fair>
+			<host>*</host>
+			<port>6802</port>
+		</source>
+	</interface>
+			
+	<interface name="HTTP peer limit is 16k">
+		<target>
+			<factory>DISPATCH</factory>
+		</target>
+		<filter>
+			<factory>HTTP</factory>
+		</filter>
+		<source>
+			<factory>ACCEPT(peer16k)</factory>
+			<host>*</host>
+			<port>6802</port>
+		</source>
+	</interface>
+			
+	<interface name="HTTP peer limit is 32k">
+		<target>
+			<factory>DISPATCH</factory>
+		</target>
+		<filter>
+			<factory>HTTP</factory>
+		</filter>
+		<source>
+			<factory>ACCEPT(peer32k)</factory>
+			<host>*</host>
+			<port>6802</port>
+		</source>
+	</interface>
+			
+	<interface name="HTTP peer limit is 64k">
+		<target>
+			<factory>DISPATCH</factory>
+		</target>
+		<filter>
+			<factory>HTTP</factory>
+		</filter>
+		<source>
+			<factory>ACCEPT(peer64k)</factory>
+			<host>*</host>
+			<port>6802</port>
+		</source>
+	</interface>
+		
+	-->
+
+	<!--
+			Интерфейс таймер
+			
+	<interface name="CRON 1 MINUTE">
+		<target>
+			<factory>pool_dispatcher</factory>
+		</target>
+		<filter>
+			<factory>REQUEST</factory>
+			<verb>GET</verb>
+			<target>myx.ru</target>
+			<attribute>
+				<key>Host</key>
+				<value>myx.ru</value>
+			</attribute>
+			<attribute>
+				<key>Content-Type</key>
+				<value>text/plain</value>
+			</attribute>
+			<parameter>
+				<key>check</key>
+				<value>true</value>
+			</parameter>
+			<body>
+				Hello world!
+			</body>
+		</filter>
+		<source>
+			<factory>TIMER</factory>
+			<delay>45s</fair>
+			<period>1m</period>
+		</source>
+	</interface>
+	
+	-->
+			
+	<!--
+			Принимающая сторона кластера
+			
+	<interface name="CLUSTER">
+		<target>
+			<factory>AE3C</factory>
+		</target>
+		<source>
+			<factory>ACCEPT</factory>
+			<fair>true</fair>
+			<host>*</host>
+			<port>83</port>
+		</source>
+	</interface>
+	
+	-->
+			
+	<!--
+			Принимающая сторона кластера c SSL
+			
+	<interface name="CLUSTER">
+		<target>
+			<factory>AE3CS</factory>
+		</target>
+		<filter>
+			<factory>TLS</factory>
+			<cipher>TLS_RSA_WITH_RC4_128_SHA</cipher>
+			<cipher>SSL_RSA_WITH_RC4_128_SHA</cipher>
+		</filter>
+		<source>
+			<factory>ACCEPT</factory>
+			<fair>true</fair>
+			<host>*</host>
+			<port>446</port>
+		</source>
+	</interface>
+	
+	-->
+			
+	<!--
+			DMESG вывод сообщений лога
+			Выводит подключившемуся все текущие сообщения лога
+			
+	<interface name="DMESG">
+		<target>
+			<factory>DMESG</factory>
+		</target>
+		<source>
+			<factory>ACCEPT</factory>
+			<host>*</host>
+			<port>24</port>
+		</source>
+	</interface>
+	
+	-->
+			
+			
+	<!--
+			TELNET, beta
+			
+	<interface name="TELNET">
+		<target>
+			<factory>TELNET</factory>
+		</target>
+		<source>
+			<factory>ACCEPT</factory>
+			<host>*</host>
+			<port>23</port>
+		</source>
+	</interface>
+	
+	-->
+			
+	<!--
+			SSH, beta
+			
+	<interface name="SSH">
+		<target>
+			<factory>SSH</factory>
+		</target>
+		<source>
+			<factory>ACCEPT</factory>
+			<host>*</host>
+			<port>22</port>
+		</source>
+	</interface>
+	
+	-->
+			
+</interfaces>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<properties>
+	<!-- 1 of 4 -->
+
+	<!--
+	###################################################################################################
+	##
+	##	Set System properties
+	##
+	-->
+	
+	<property id='java.protocol.handler.pkgs' value='com.sun.net.ssl.internal.www.protocol'/>
+
+</properties>
