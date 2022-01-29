@@ -11,6 +11,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,7 +63,7 @@ public final class Main {
 				fos.write(bytes);
 			}
 		}
-		return Xml.toBase("serverStarter", Transfer.createBuffer(file).toString(Engine.CHARSET_DEFAULT), null, null, null);
+		return Xml.toBase("serverStarter", Transfer.createBuffer(file).toString(Charset.defaultCharset()), null, null, null);
 	}
 	
 	private static final BaseObject initializeClasses(final File configFolder) throws IOException, FileNotFoundException, UnsupportedEncodingException {
@@ -161,7 +163,7 @@ public final class Main {
 						Report.event("AE1-CORE", "INIT", "Reading '" + file.getName() + "': " + file.getAbsolutePath());
 						final BaseObject object = Xml.toBase(
 								"serverStarter: " + file.getName(), //
-								Transfer.createBuffer(file).toString(Engine.CHARSET_UTF8),
+								Transfer.createBuffer(file).toString(StandardCharsets.UTF_8),
 								null,
 								null,
 								null);
