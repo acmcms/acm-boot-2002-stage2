@@ -292,10 +292,10 @@
 		<filter>
 			<factory>REQUEST</factory>
 			<verb>GET</verb>
-			<target>myx.ru</target>
+			<target>myx.nz</target>
 			<attribute>
 				<key>Host</key>
-				<value>myx.ru</value>
+				<value>myx.nz</value>
 			</attribute>
 			<attribute>
 				<key>Content-Type</key>
