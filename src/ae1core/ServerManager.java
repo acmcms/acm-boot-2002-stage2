@@ -7,6 +7,8 @@
 package ae1core;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,6 +69,18 @@ class ServerManager implements ServerManagerImpl {
 		return result == Server.NULL_SERVER
 			? null
 			: result;
+	}
+	
+	@Override
+	public Collection<String> knownDomainNames() {
+
+		return Collections.unmodifiableList(Arrays.asList(this.domainNames));
+	}
+	
+	@Override
+	public Collection<String> knownServerNames() {
+
+		return Collections.unmodifiableSet(this.known.keySet());
 	}
 	
 	@Override
